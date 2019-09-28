@@ -1,3 +1,4 @@
 .vscode/*
 *.txt
 .idea/*
+__pycache__/

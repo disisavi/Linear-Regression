@@ -18,13 +18,13 @@ with open('ex1data2.txt') as dataFile:
         x[2].append(int(row[1], 10))
         y.append(int(row[2], 10))
 
-engine = regressionEngine(x, y, 50, False)
+engine = regressionEngine(x, y, 1000, False)
 
 thetalist = engine.doGradientDecent()
 print("THe theta is ", thetalist)
 
 jtheta, hlist = engine.calculateJTheta(thetalist)
-print("The Error is  ", jtheta, hlist)
+print("The error is  ", jtheta)
 fig = plt.figure()
 ax = plt.axes(projection='3d')
 ax.scatter(x[1], x[2], y, 'blue')

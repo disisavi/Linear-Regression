@@ -3,6 +3,8 @@ import sys
 
 
 class regressionEngine:
+    alpha = 0.00000002  # Convergence control variable
+    e = 10  # convergence variable
 
     def __init__(self, x, y, maxiterations, test=False):
         self.y = y
@@ -47,33 +49,38 @@ class regressionEngine:
         # thetalist.append([[0, 0, 0]])
         if self.test:
             print("************ Starting gradient descent. :)")
-        alpha = 0.00000001
         for theta in thetalist:
-            olderror = sys.maxsize
             for k in range(self.maxiterations):
+                # todo
+                # 1. Allow multiple theta's to be initialised from the start and then compare
+                # the final result among all of them to check we reached True Minima
                 if self.test:
                     print("Iteration Number ", k)
                 newthetalist = []
                 h = [(self.calculateH(theta, i) - self.y[i]) for i in range(len(self.y))]
-                if self.test:
-                    print("The hi - yi = ", h)
+                # if self.test:
+                #     print("The hi - yi = ", h)
+
+                olderror = self.calculateJTheta(theta)[0]
                 for i in range(len(theta)):
                     hx = [h[j] * self.x[i][j] for j in range(len(h))]
                     hx = sum(hx) / len(self.y)
-                    newTheta = theta[i] - alpha * hx
-                    if self.test:
-                        print("\tNew HX ", hx)
-                        print("NewTheta = ", newTheta)
+                    newTheta = theta[i] - self.alpha * hx
+                    # if self.test:
+                    #     print("\tNew HX ", hx)
+                    #     print("NewTheta = ", newTheta)
                     newthetalist.append(newTheta)
-                if self.test:
-                    print("\titeration {", k, "}\n\t New Theta = ", newthetalist,
-                          "\n\tDiff = ",
-                          self.calculateJTheta(newthetalist)[0] - self.calculateJTheta(theta)[0])
+
                 newerror = self.calculateJTheta(newthetalist)[0]
-                if abs(self.calculateJTheta(newthetalist)[0] - self.calculateJTheta(theta)[
-                    0]) > 1 or newerror > olderror:
+                if self.test:
+                    print("\t Diff", newerror, olderror, olderror - newerror)
+                    print("Thetalist ", newthetalist)
+                errorDiff = olderror - newerror
+
+                if errorDiff > self.e:
                     theta = newthetalist
-                    olderror = newerror
                 else:
                     break
+
+        print("K = ", k)
         return newthetalist

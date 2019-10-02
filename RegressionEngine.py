@@ -6,6 +6,7 @@ import sys
 class regressionEngine:
     alpha = 0.00000002  # Convergence control variable
     e = 10  # convergence variable
+    lambdareg = 100
 
     def __init__(self, x, y, maxiterations, test=False):
         self.comparisonerror = sys.maxsize
@@ -52,23 +53,36 @@ class regressionEngine:
 
         return errorDiff <= self.e or errorGettingBigger
 
-    def doGradientDecent(self) -> List[int]:
-        thetalist = [[1000, 1000, 1000]]
+    def getThetaForGD(self, theta, hx, reg):
+        if reg:
+            theta = theta * (1 - self.alpha * self.lambdareg)
+        return theta - self.alpha * hx
+
+    def doGradientDecent(self, regularise=False) -> List[int]:
+        thetaMatrix = [[1000, 1000, 1000]]
 
         if self.test:
             print("************ Starting gradient descent. :)")
-        for theta in thetalist:
+        for thetaList in thetaMatrix:
             for k in range(self.maxiterations):
                 if self.test:
                     print("Iteration Number ", k)
                 newthetalist = []
-                h = [(self.calculateH(theta, i) - self.y[i]) for i in range(len(self.y))]
+                h = [(self.calculateH(thetaList, i) - self.y[i]) for i in range(len(self.y))]
+                firstcheckpass = False
 
-                olderror = self.calculateJTheta(theta)[0]
-                for i in range(len(theta)):
+                olderror = self.calculateJTheta(thetaList)[0]
+                for i in range(len(thetaList)):
                     hx = [h[j] * self.x[i][j] for j in range(len(h))]
                     hx = sum(hx) / len(self.y)
-                    newTheta = theta[i] - self.alpha * hx
+                    theta = thetaList[i]
+
+                    if regularise and firstcheckpass and i != 0:
+                        newTheta = self.getThetaForGD(theta, hx, True)
+                    else:
+                        newTheta = self.getThetaForGD(theta, hx, False)
+                        firstcheckpass = True
+
                     newthetalist.append(newTheta)
 
                 newerror = self.calculateJTheta(newthetalist)[0]
@@ -79,7 +93,7 @@ class regressionEngine:
                     if self.test:
                         print("New theta list ", newthetalist)
 
-                    theta = newthetalist
+                    thetaList = newthetalist
 
         print("K = ", k)
         return newthetalist

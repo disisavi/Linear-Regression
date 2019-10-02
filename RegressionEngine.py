@@ -1,4 +1,6 @@
 from typing import List
+from random import randint
+import sys
 
 
 class regressionEngine:
@@ -6,6 +8,7 @@ class regressionEngine:
     e = 10  # convergence variable
 
     def __init__(self, x, y, maxiterations, test=False):
+        self.comparisonerror = sys.maxsize
         self.y = y
         self.x = x
         self.test = test
@@ -26,16 +29,28 @@ class regressionEngine:
         return (y - h) ** 2
 
     def calculateJTheta(self, thetalist):
-        jtheta = []
+        jtheta = 0
         hlist = []
         for i in range(len(self.y)):
             h = self.calculateH(thetalist, i)
             hlist.append(h)
-            jtheta.append(self.calculateJ(h, self.y[i]))
+            jtheta += self.calculateJ(h, self.y[i])
 
-        jtheta = sum(jtheta)
         jtheta = jtheta / (2 * len(self.y))
         return jtheta, hlist
+
+    def convergeDescent(self, newError, oldError, checkErrorGrowth=False):
+        errorGettingBigger = False
+        if self.test:
+            print("\t Diff", newError, oldError, oldError - newError)
+        errorDiff = abs(oldError - newError)
+        if checkErrorGrowth:
+            if errorDiff > self.comparisonerror:
+                errorGettingBigger = True
+            else:
+                self.comparisonerror = newError
+
+        return errorDiff <= self.e or errorGettingBigger
 
     def doGradientDecent(self) -> List[int]:
         thetalist = [[1000, 1000, 1000]]
@@ -57,18 +72,55 @@ class regressionEngine:
                     newthetalist.append(newTheta)
 
                 newerror = self.calculateJTheta(newthetalist)[0]
-                if self.test:
-                    print("\t Diff", newerror, olderror, olderror - newerror)
-                    print("Thetalist ", newthetalist)
-                errorDiff = olderror - newerror
 
-                if errorDiff > self.e:
-                    theta = newthetalist
-                else:
+                if self.convergeDescent(newerror, olderror, True):
                     break
+                else:
+                    if self.test:
+                        print("New theta list ", newthetalist)
+
+                    theta = newthetalist
 
         print("K = ", k)
         return newthetalist
+
+    def doStochasticGradientDescent(self, alpha=None) -> List[int]:
+        thetalist = [[1000, 1000, 1000]]
+
+        if self.test:
+            print("************ Starting gradient descent. :)")
+
+        if alpha is None:
+            alpha = self.alpha
+
+        iList = {}  ##Set of previosly generated i values so that we dont accidentally keep repeating SGD on the same set
+        for theta in thetalist:
+            for k in range(self.maxiterations):
+
+                while True:
+                    i = randint(0, len(self.y) - 1)
+                    if i not in iList:
+                        break
+                h = self.calculateH(theta, i) - self.y[i]
+                newThetaList = []
+                olderror = self.calculateJTheta(theta)[0]
+                for j in range(len(theta)):
+                    hx = h * self.x[j][i]
+                    newTheta = theta[j] - alpha * hx
+                    newThetaList.append(newTheta)
+
+                newerror = self.calculateJTheta(newThetaList)[0]
+
+                if self.convergeDescent(newerror, olderror):
+                    break
+                else:
+                    if self.test:
+                        print("New theta list ", newThetaList)
+
+                    theta = newThetaList
+
+            print("K = ", k)
+            return newThetaList
 
 # todo
 # 1. Allow multiple theta's to be initialised from the start and then compare

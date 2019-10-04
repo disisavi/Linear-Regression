@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from random import randint
 import sys
+import numpy as np
 
 
 class regressionEngine:
@@ -59,7 +60,8 @@ class regressionEngine:
         return theta - self.alpha * hx
 
     def doGradientDecent(self, regularise=False) -> List[int]:
-        thetaMatrix = [[1000, 1000, 1000]]
+        iterationList: List = []
+        thetaMatrix = [[100, 100, 100]]
 
         if self.test:
             print("************ Starting gradient descent. :)")
@@ -72,6 +74,7 @@ class regressionEngine:
                 firstcheckpass = False
 
                 olderror = self.calculateJTheta(thetaList)[0]
+                iterationList.append(olderror)
                 for i in range(len(thetaList)):
                     hx = [h[j] * self.x[i][j] for j in range(len(h))]
                     hx = sum(hx) / len(self.y)
@@ -96,9 +99,10 @@ class regressionEngine:
                     thetaList = newthetalist
 
         print("K = ", k)
-        return newthetalist
+        return iterationList
 
     def doStochasticGradientDescent(self, alpha=None) -> List[int]:
+        iterationList: List = []
         thetalist = [[1000, 1000, 1000]]
 
         if self.test:
@@ -118,6 +122,7 @@ class regressionEngine:
                 h = self.calculateH(theta, i) - self.y[i]
                 newThetaList = []
                 olderror = self.calculateJTheta(theta)[0]
+                iterationList.append(olderror)
                 for j in range(len(theta)):
                     hx = h * self.x[j][i]
                     newTheta = theta[j] - alpha * hx
@@ -133,9 +138,15 @@ class regressionEngine:
 
                     theta = newThetaList
 
-            print("K = ", k)
-            return newThetaList
+        print("K = ", k)
+        return iterationList
 
-# todo
-# 1. Allow multiple theta's to be initialised from the start and then compare
-# the final result among all of them to check we reached True Minima
+    def doClosedSol(self):
+        x = np.array(list(zip(self.x[1], self.x[2])))
+        y = np.array(self.y)
+        print(len(x))
+        xtranspose = np.transpose(x)
+        xinverser = np.linalg.inv(np.dot(xtranspose, x))
+        thetamatrix = np.dot(xtranspose, y)
+        thetamatrix = np.dot(thetamatrix, xinverser)
+        return thetamatrix.tolist()

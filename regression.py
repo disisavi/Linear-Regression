@@ -20,13 +20,70 @@ with open('ex1data2.txt') as dataFile:
 
 engine = regressionEngine(x, y, 1000, False)
 
-thetalist = engine.doGradientDecent()
-print("THe theta is ", thetalist)
-
-jtheta, hlist = engine.calculateJTheta(thetalist)
-print("The error is  ", jtheta)
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter(x[1], x[2], y, 'blue')
-ax.scatter(x[1], x[2], hlist, 'gray')
+iterationThetaListGD = engine.doGradientDecent()
+errorListGD = list(zip(*iterationThetaListGD))[1]
+plt.plot(errorListGD, 'RED', label='GD')
+plt.legend()
 plt.show()
+
+iterationThetaListSGD = engine.doStochasticGradientDescent()
+errorListSGD = list(zip(*iterationThetaListSGD))[1]
+plt.plot(errorListSGD, 'BLUE', label='Stochastic GD')
+plt.legend()
+plt.show()
+
+iterationThetaListL2GD = engine.doGradientDecent(True)
+errorListL2GD = list(zip(*iterationThetaListL2GD))[1]
+plt.plot(errorListL2GD, 'Green', label='L2')
+plt.legend()
+plt.show()
+
+totalLength = len(y) - 1
+testLenght = round(totalLength * 2 / 3)
+
+thetalist = engine.doClosedSol()
+thetalist.insert(0, 121)
+jtheta, hlist = engine.calculateJTheta(thetalist)
+print("The Lw for Closed sol is\t -- ", jtheta)
+
+xtrain = []
+xtrain.append([x[0][i] for i in range(testLenght)])
+xtrain.append([x[1][i] for i in range(testLenght)])
+xtrain.append([x[2][i] for i in range(testLenght)])
+ytest = [y[i] for i in range(testLenght)]
+
+xpredict = []
+xpredict.append([x[0][i] for i in range(testLenght, totalLength - 1)])
+xpredict.append([x[1][i] for i in range(testLenght, totalLength - 1)])
+xpredict.append([x[2][i] for i in range(testLenght, totalLength - 1)])
+ypredict = [y[i] for i in range(testLenght, totalLength - 1)]
+
+trainEngine = regressionEngine(xtrain, ytest, 1000, False)
+predictEngine = regressionEngine(xpredict, ypredict, 1000, False)
+
+iterationThetaListGD = trainEngine.doGradientDecent()
+thetalist = iterationThetaListGD[len(iterationThetaListGD) - 1][0]
+
+jtheta, hlist = trainEngine.calculateJTheta(thetalist)
+print("The Lw for Training data for GD -- ", jtheta)
+
+jtheta, hlist = predictEngine.calculateJTheta(thetalist)
+print("The Lw for Test data for GD \t-- ", jtheta)
+
+iterationThetaListSGD = trainEngine.doStochasticGradientDescent()
+thetalist = iterationThetaListSGD[len(iterationThetaListSGD) - 1][0]
+
+jtheta, hlist = trainEngine.calculateJTheta(thetalist)
+print("The Lw for Training data for SGD -- ", jtheta)
+
+jtheta, hlist = predictEngine.calculateJTheta(thetalist)
+print("The Lw for Test data for SGD \t -- ", jtheta)
+
+iterationThetaListL2GD = trainEngine.doGradientDecent(True)
+thetalist = iterationThetaListL2GD[len(iterationThetaListL2GD) - 1][0]
+
+jtheta, hlist = trainEngine.calculateJTheta(thetalist)
+print("The Lw for Training data for L2GD -- ", jtheta)
+
+jtheta, hlist = predictEngine.calculateJTheta(thetalist)
+print("The Lw for Test data for L2GD \t  --  ", jtheta)

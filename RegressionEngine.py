@@ -59,9 +59,10 @@ class regressionEngine:
             theta = theta * (1 - self.alpha * self.lambdareg)
         return theta - self.alpha * hx
 
-    def doGradientDecent(self, regularise=False) -> List[int]:
+    def doGradientDecent(self, regularise=False) -> List[Tuple]:
+        self.comparisonerror = sys.maxsize
         iterationList: List = []
-        thetaMatrix = [[100, 100, 100]]
+        thetaMatrix = [[10000, 10000, 10000]]
 
         if self.test:
             print("************ Starting gradient descent. :)")
@@ -74,7 +75,7 @@ class regressionEngine:
                 firstcheckpass = False
 
                 olderror = self.calculateJTheta(thetaList)[0]
-                iterationList.append(olderror)
+                iterationList.append((thetaList, olderror))
                 for i in range(len(thetaList)):
                     hx = [h[j] * self.x[i][j] for j in range(len(h))]
                     hx = sum(hx) / len(self.y)
@@ -98,12 +99,12 @@ class regressionEngine:
 
                     thetaList = newthetalist
 
-        print("K = ", k)
+        print("Iterations to complete = ", k)
         return iterationList
 
-    def doStochasticGradientDescent(self, alpha=None) -> List[int]:
+    def doStochasticGradientDescent(self, alpha=None) -> List[Tuple]:
         iterationList: List = []
-        thetalist = [[1000, 1000, 1000]]
+        thetalist = [[10000, 10000, 10000]]
 
         if self.test:
             print("************ Starting gradient descent. :)")
@@ -122,7 +123,7 @@ class regressionEngine:
                 h = self.calculateH(theta, i) - self.y[i]
                 newThetaList = []
                 olderror = self.calculateJTheta(theta)[0]
-                iterationList.append(olderror)
+                iterationList.append((theta, olderror))
                 for j in range(len(theta)):
                     hx = h * self.x[j][i]
                     newTheta = theta[j] - alpha * hx
@@ -141,7 +142,7 @@ class regressionEngine:
         print("K = ", k)
         return iterationList
 
-    def doClosedSol(self):
+    def doClosedSol(self) -> List:
         x = np.array(list(zip(self.x[1], self.x[2])))
         y = np.array(self.y)
         print(len(x))

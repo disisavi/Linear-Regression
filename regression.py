@@ -21,30 +21,39 @@ with open('ex1data2.txt') as dataFile:
 engine = regressionEngine(x, y, 1000, False)
 
 iterationThetaListGD = engine.doGradientDecent()
+theta = iterationThetaListGD[len(iterationThetaListGD) - 1][0]
+print("Parameters for GD are ",theta)
 errorListGD = list(zip(*iterationThetaListGD))[1]
 plt.plot(errorListGD, 'RED', label='GD')
 plt.legend()
 plt.show()
 
 iterationThetaListSGD = engine.doStochasticGradientDescent()
+theta = iterationThetaListSGD[len(iterationThetaListSGD) - 1][0]
+print("Parameters for Stochastic GD are ",theta)
 errorListSGD = list(zip(*iterationThetaListSGD))[1]
 plt.plot(errorListSGD, 'BLUE', label='Stochastic GD')
 plt.legend()
 plt.show()
 
 iterationThetaListL2GD = engine.doGradientDecent(True)
+theta = iterationThetaListL2GD[len(iterationThetaListL2GD) - 1][0]
+print("Parameters for L2 GD are ",theta)
 errorListL2GD = list(zip(*iterationThetaListL2GD))[1]
 plt.plot(errorListL2GD, 'Green', label='L2')
 plt.legend()
 plt.show()
 
-totalLength = len(y) - 1
-testLenght = round(totalLength * 2 / 3)
-
 thetalist = engine.doClosedSol()
 thetalist.insert(0, 121)
 jtheta, hlist = engine.calculateJTheta(thetalist)
+print("Parameters for closed from are ",thetalist)
 print("The Lw for Closed sol is\t -- ", jtheta)
+
+totalLength = len(y) - 1
+testLenght = round(totalLength * 2 / 3)
+
+
 
 xtrain = []
 xtrain.append([x[0][i] for i in range(testLenght)])

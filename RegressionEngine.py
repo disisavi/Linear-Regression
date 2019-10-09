@@ -139,13 +139,12 @@ class regressionEngine:
 
                     theta = newThetaList
 
-        print("K = ", k)
+        print("Iterations to complete = ", k)
         return iterationList
 
     def doClosedSol(self) -> List:
         x = np.array(list(zip(self.x[1], self.x[2])))
         y = np.array(self.y)
-        print(len(x))
         xtranspose = np.transpose(x)
         xinverser = np.linalg.inv(np.dot(xtranspose, x))
         thetamatrix = np.dot(xtranspose, y)
